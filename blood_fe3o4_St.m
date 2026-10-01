@@ -1,3 +1,4 @@
+function blood_fe3o4_St
 %% Blood-Fe3O4 nanofluid (modified model): profiles vs squeeze number St
 %  Solves the non-dimensional system of modified_model.tex (momentum, energy,
 %  concentration) with bvp4c for St = [-1 -0.5 0 0.5 1] and plots f, f',
@@ -5,7 +6,11 @@
 %
 %  Each St is solved with a homotopy in Pr, 1 -> 5 -> 10 -> 15 -> 21, starting
 %  from a simple guess; the energy equation is stiff at Pr = 21.
-clear; clc; close all;
+%
+%  Written as a function file (main function + local functions) so it also
+%  runs on MATLAB releases older than R2016b, which do not allow functions
+%  inside scripts. Run it by typing  blood_fe3o4_St  at the prompt.
+clc; close all;
 
 %% ---------------- Parameters ----------------
 P.beta  = 0.1;   % variable-viscosity parameter
@@ -81,25 +86,33 @@ mrk   = {'o','s','^','d','v'};
 names = {'$f(\eta)$','$f''(\eta)$','$\theta(\eta)$','$\phi(\eta)$'};
 files = {'St_f','St_fp','St_theta','St_phi'};
 rows  = [1 2 5 7];
+mIdx  = @(i) 1+mod(8*(i-1),40):40:numel(eta);   % marker positions, staggered per curve
 for k = 1:4
-    figure(k); set(gcf,'Color','w','Units','inches','Position',[1 1 6.4 4.8]);
+    figure(k); set(gcf,'Color','w','Units','inches','Position',[1 1 6.4 4.8], ...
+                      'PaperUnits','inches','PaperPosition',[0 0 6.4 4.8]);
     hold on; box on; grid on;
+    hLeg = [];  labels = {};
     for i = find(ok)
-        Y = deval(sol{i}, eta);
-        plot(eta, Y(rows(k),:), lsty{i}, 'LineWidth', 2.0, 'Color', cols(i,:), ...
-             'Marker', mrk{i}, 'MarkerIndices', 1+mod(8*(i-1),40):40:numel(eta), ...
-             'MarkerSize', 7, 'MarkerFaceColor', 'w', ...
-             'DisplayName', sprintf('$S_t = %g$', StVec(i)));
+        Y  = deval(sol{i}, eta);
+        yk = Y(rows(k),:);
+        idx = mIdx(i);
+        plot(eta, yk, lsty{i}, 'LineWidth', 2.0, 'Color', cols(i,:));
+        plot(eta(idx), yk(idx), mrk{i}, 'LineStyle', 'none', 'Color', cols(i,:), ...
+             'MarkerSize', 7, 'MarkerFaceColor', 'w', 'LineWidth', 1.4);
+        % invisible line + marker used only for the legend entry
+        hLeg(end+1) = plot(NaN, NaN, lsty{i}, 'LineWidth', 2.0, 'Color', cols(i,:), ...
+                           'Marker', mrk{i}, 'MarkerSize', 7, 'MarkerFaceColor', 'w'); %#ok<AGROW>
+        labels{end+1} = sprintf('$S_t = %g$', StVec(i));                               %#ok<AGROW>
     end
     xlabel('$\eta$','Interpreter','latex','FontSize',16);
     ylabel(names{k},'Interpreter','latex','FontSize',16);
-    legend('Interpreter','latex','Location','northoutside','Orientation','horizontal', ...
-           'NumColumns',5,'FontSize',11,'Box','off');
-    set(gca,'FontSize',13,'TickLabelInterpreter','latex','TickDir','in', ...
-            'XMinorTick','on','YMinorTick','on','LineWidth',1.0,'GridAlpha',0.15);
+    lg = legend(hLeg, labels, 'Location','northoutside','Orientation','horizontal');
+    set(lg,'Interpreter','latex','FontSize',11,'Box','off');
+    set(gca,'FontSize',13,'TickDir','in','XMinorTick','on','YMinorTick','on','LineWidth',1.0);
     xlim([0 1]);
-    exportgraphics(gcf, [files{k} '.png'], 'Resolution', 400);
+    print(gcf, files{k}, '-dpng', '-r400');
 end
+end   % main function blood_fe3o4_St
 
 %% ---------------- omega-dependent quantities -> L1..L5, Brinkman factor ----------------
 function P = setOmega(P, w, TP)
