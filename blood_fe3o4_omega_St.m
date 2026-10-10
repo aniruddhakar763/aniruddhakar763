@@ -101,7 +101,7 @@ rows   = [1 2 5 7 0];          % 0 -> pressure gradient
 
 for k = 1:5
     figure(k); hold on; box on; grid on;
-    c = 0;
+    c = 0;  h = [];  lab = {};
     for j = 1:nS
         for i = 1:nO
             c = c + 1;
@@ -112,14 +112,14 @@ for k = 1:5
             else
                 v = dpdeta(eta, Y, Q{i}, StVec(j));
             end
-            plot(eta, v, 'LineStyle', styles{c}, 'Color', cols(c,:), ...
-                 'LineWidth', 1.8, 'DisplayName', ...
-                 sprintf('$St = %g,\\ \\omega = %g$', StVec(j), omegaVec(i)));
+            h(end+1)   = plot(eta, v, 'LineStyle', styles{c}, 'Color', cols(c,:), ...
+                              'LineWidth', 1.8);
+            lab{end+1} = sprintf('$St = %g,\\ \\omega = %g$', StVec(j), omegaVec(i));
         end
     end
     xlabel('$\eta$','Interpreter','latex','FontSize',14);
     ylabel(names{k},'Interpreter','latex','FontSize',14);
-    legend('Interpreter','latex','Location','best','FontSize',11);
+    legend(h, lab, 'Interpreter','latex','Location','best','FontSize',11);
     set(gca,'FontSize',12);
 end
 
