@@ -8,7 +8,11 @@
 %    (27)-(34) boundary conditions
 %  for Bi = [0.001 0.01 0.1 1] at omega = 0.02 and plots
 %  f, f', theta, phi, p in figures 1-5.
-clear; clc; close all;
+%  Written as a function file (helpers below are subfunctions) so it runs in any
+%  MATLAB version. Run the whole file (F5 / Run, or type its name in the Command
+%  Window), not section by section.
+function blood_fe3o4_eq21_34_Bi
+clc; close all;
 
 %% ---------------- Parameters ----------------
 P.St    = -1;     % squeeze number (positive or negative)
@@ -94,6 +98,8 @@ for k = 1:numel(rows)
     ylabel(names{k},'Interpreter','latex','FontSize',14);
     legend('Interpreter','latex','Location','best','FontSize',12);
     set(gca,'FontSize',12);
+end
+
 end
 
 %% ---------------- One bvp4c solve at a given Bi ----------------
